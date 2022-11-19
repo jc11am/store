@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const bcrypt = require("bcrypt")
 
 const userSchema = mongoose.Schema({
     name: {
@@ -14,8 +15,7 @@ const userSchema = mongoose.Schema({
       password: {
         type: String,
         required: [true, "Please add a password"],
-        minLength: [6, "Password must be up to 6 characters"],
-        maxLength: [23, "Password must not be more than 23 characters"],
+        minLength: [6, "Password must be up to 6 characters or above"],
       },
       photo: {
         type: String,
@@ -37,19 +37,37 @@ const userSchema = mongoose.Schema({
     }
   );
 
+  userSchema.pre("save", async function(next){
+    if(!this.isModified("password")){
+      return next();
+    }
+        //hash password
+    const salt = await bcrypt.genSalt(10)
+    const hashed = await bcrypt.hash(this.password, salt)
+    this.password = hashed;
+    next()
+  })
+
+
   userSchema.statics.signup = async function( name, email, password ){
     //check if filled is empty
     if(!name || !email || !password){
       throw Error ("Fill required filled")
     }
-    
+    //check password length
+    if(password.length < 6 ){
+      throw Error ("Password must be up to 6 characters or above")
+    }
+    //check if email already exist
     const userMail = await this.findOne({email})
     if(userMail){
       throw Error ("Email already in use")
     }
-
+    //create new user
+    const newUser = await this.create({name, email, password})
+    return newUser
   }
 
-  const User = mongoose.model("User", userSchema);
+  const Usersign = mongoose.model("Usersign", userSchema);
 
-  module.exports = User;
+  module.exports = Usersign;
