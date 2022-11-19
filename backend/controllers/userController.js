@@ -11,7 +11,16 @@ const signUp = async function(req, res){
     try {
         //save user to DB
         const user = await Usersign.signup( name, email, password )
+        //craete token
         const token = createToken(user._id)
+        //send http onlt cookie
+        res.cookie("token", token, {
+           path: "/",
+           httpOnly: true,
+           expires: new Date(Date.now() + 1000 * 86400),
+           sameSite: "none",
+           secure: true
+        });
         res.status(200).json({user, token})
     } catch (error) {
         res.status(400).json({ error: error.message })

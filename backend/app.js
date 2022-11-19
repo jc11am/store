@@ -4,6 +4,7 @@ const mongoose = require("mongoose")
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const userRoutes = require("./routes/userRoutes");
+const cookie = require("cookie-parser")
 
 const app = express();
 
@@ -11,6 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json()); 
+app.use(cookie())
 
 //routes
 app.use("/api/user", userRoutes)
