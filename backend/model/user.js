@@ -68,6 +68,22 @@ const userSchema = mongoose.Schema({
     return newUser
   }
 
+  userSchema.statics.login = async function(email, password){
+    //check if filled is empty
+    if(!email || !password){
+      throw Error ("Please fill required filled")
+    }
+    const user = await this.findOne({email})
+    if(!user){
+      throw Error ("User does not exist")
+    }
+    const compare = await bcrypt.compare(password, user.password)
+    if(!compare){
+      throw Error ("Invalid email or password")
+    }
+    return user
+  }
+
   const Usersign = mongoose.model("Usersign", userSchema);
 
   module.exports = Usersign;

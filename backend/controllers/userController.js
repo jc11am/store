@@ -27,6 +27,27 @@ const signUp = async function(req, res){
     }
 }
 
+const logIn = async function(req, res) {
+    const {email, password} = req.body
+    try {
+        const user = await Usersign.login(email, password)
+        //create token
+        const token = createToken(user._id)
+        res.cookie("token", token, {
+            path: "/",
+            httpOnly: true,
+            expires: new Date(Date.now() + 1000 * 86400),
+            sameSite: "none",
+            secure: true
+            
+        })
+        res.status(200).json({user, token})
+    } catch (error) {
+        res.status(400).json({error: error.message})
+    }
+}
+
 module.exports = {
-    signUp
+    signUp,
+    logIn
 }
