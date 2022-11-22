@@ -6,6 +6,16 @@ const createToken = function(_id) {
 }
 
 
+const getUser = async function(req, res) {
+    const { _id } = req.user
+    const user = await Usersign.findById({_id})
+
+    if (!user){
+        res.status(400).json({message: "User not found"})
+    }
+    res.status(200).json({user})
+}
+
 const signUp = async function(req, res){
     const { name, email, password } = req.body
     try {
@@ -47,7 +57,20 @@ const logIn = async function(req, res) {
     }
 }
 
+const logOut = async function(req, res) {
+    res.cookie("token", "", {
+        path: "/",
+        httpOnly: true,
+        expires: new Date(0),
+        sameSite: "none",
+        secure: true       
+    })
+    return res.status(200).json({message: "Logout Successfully"})
+}
+
 module.exports = {
     signUp,
-    logIn
+    logIn,
+    logOut,
+    getUser
 }
