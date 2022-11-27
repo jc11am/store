@@ -102,11 +102,18 @@ const changepassword = async function(req, res) {
     const { oldPassword, password } = req.body
 
     try {
+        
         const user = await Usersign.findById(id)
         //validation
+
+        if(!user){
+            return res.status(400).json({message: "User  not found"})
+        }
+
         if(!oldPassword || !password){
             return res.status(400).json({message: "All filleds are required"})
         }
+        
         const compare = await jwt.compare(oldPassword, user.password)
         if(!compare){
             return res.status(400).json({message: "Password does not match"})
@@ -116,10 +123,15 @@ const changepassword = async function(req, res) {
             await user.save()
             return res.status(200).json({message: "Password changed"})
         }
+        
 
     } catch (error) {
-        res.status(400).json({message: "Password incorrect"})
+        res.status(400).json({message: "Password is incorrect"})
     }
+}
+
+const forgotpassword = async function(req, res) {
+    
 }
 
 const logOut = async function(req, res) {
@@ -140,5 +152,6 @@ module.exports = {
     getUser,
     logedIn,
     updateUser,
-    changepassword
+    changepassword,
+    forgotpassword
 }
