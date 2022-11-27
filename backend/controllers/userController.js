@@ -1,5 +1,8 @@
 const Usersign = require("../model/user")
 const jwt = require("jsonwebtoken")
+const crypto = require("crypto")
+const modelToken = require("../model/token")
+const Token = require("../model/token")
 
 const createToken = function(_id) {
     return jwt.sign({_id}, process.env.Secret, {expiresIn : "2d"})
@@ -131,7 +134,48 @@ const changepassword = async function(req, res) {
 }
 
 const forgotpassword = async function(req, res) {
-    
+    const { email } = req.body
+    try {
+        const user = await Usersign.findOne({email})
+        
+        if(!user) {
+            return res.status(400).json({message: "Email is incorrect"}) 
+        }
+        //create reset token 
+        let genToken = crypto.randomBytes(32).toString("hex") + user._id;
+
+        //hash token before saving to db
+        const hashToken = crypto
+            .createHash("lala199")
+            .update(genToken)
+            .digest("hex");
+        //save token to db
+            await new Token({
+                userId: user._id,
+                token: hashToken,
+                createdAt: Date.now(),
+                expiresAt: Date.now() + 30 * (60 * 1000)//thirty minutes
+            }).save()
+
+            //construct reset url
+            const resetUrl = `${process.env.FRONTEND_URL}/
+                resetpassword/${resetToken}`
+
+            //reset email
+            const message = `
+               <h2>Hello ${user.name}</h2>
+               <p>please use the url below to reset
+               your password</p>
+               <p>This reset link is valid for only 30minutes</p> 
+
+
+               <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+
+               <p>Regards...</p>
+            `
+    } catch (error) {
+        
+    }
 }
 
 const logOut = async function(req, res) {
